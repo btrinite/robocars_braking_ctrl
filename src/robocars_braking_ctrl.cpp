@@ -330,7 +330,7 @@ void RosInterface::controlActuatorFromRadio (uint32_t braking_value) {
         brakingMsg.norm = norm;
     } else {
         brakingMsg.pwm = 1500;
-        brakingMsg.norm = 0
+        brakingMsg.norm = 0;
     }
     act_braking_pub.publish(brakingMsg);
 }
