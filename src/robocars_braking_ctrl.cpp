@@ -270,7 +270,7 @@ void RosInterface::updateParam() {
 }
 
 void RosInterface::initPub () {
-    act_braking_pub = nh.advertise<robocars_msgs::robocars_actuator_output>("output", 10);
+    act_braking_pub = nh.advertise<robocars_msgs::robocars_actuator_output>("output", 1);
 }
 
 void RosInterface::initSub () {
@@ -320,13 +320,18 @@ void RosInterface::mode_msg_cb(const robocars_msgs::robocars_actuator_ctrl_mode:
 void RosInterface::controlActuatorFromRadio (uint32_t braking_value) {
 
     robocars_msgs::robocars_actuator_output brakingMsg;
-
+    float norm=0.0;
     brakingMsg.header.stamp = ros::Time::now();
     brakingMsg.header.seq=1;
     brakingMsg.header.frame_id = "mainBraking";
-    brakingMsg.pwm = std::min((uint32_t)1500,mapRange(command_input_min,command_input_max,command_output_min,command_output_max,braking_value));
-    brakingMsg.norm = std::fmin((_Float32)0.0,mapRange((_Float32)command_input_min,(_Float32)command_input_max,-1.0,1.0,(_Float32)braking_value));
-
+    norm = std::fmin((_Float32)0.0,mapRange((_Float32)command_input_min,(_Float32)command_input_max,-1.0,1.0,(_Float32)braking_value));
+    if (norm>0.2) {
+        brakingMsg.pwm = std::min((uint32_t)1500,mapRange(command_input_min,command_input_max,command_output_min,command_output_max,braking_value));
+        brakingMsg.norm = norm;
+    } else {
+        brakingMsg.pwm = 1500;
+        brakingMsg.norm = 0
+    }
     act_braking_pub.publish(brakingMsg);
 }
 
