@@ -325,7 +325,7 @@ void RosInterface::controlActuatorFromRadio (uint32_t braking_value) {
     brakingMsg.header.seq=1;
     brakingMsg.header.frame_id = "mainBraking";
     norm = std::fmin((_Float32)0.0,mapRange((_Float32)command_input_min,(_Float32)command_input_max,-1.0,1.0,(_Float32)braking_value));
-    if (norm>0.2) {
+    if (norm<-0.2) {
         brakingMsg.pwm = std::min((uint32_t)1500,mapRange(command_input_min,command_input_max,command_output_min,command_output_max,braking_value));
         brakingMsg.norm = norm;
     } else {
