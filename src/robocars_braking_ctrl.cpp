@@ -357,7 +357,7 @@ void RosInterface::maintainIdleActuator () {
 
     brakingMsg.header.stamp = ros::Time::now();
     brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = "mainBraking";
+    brakingMsg.header.frame_id = "0";
     brakingMsg.pwm = 1500;
     brakingMsg.norm = 0.0;
 
@@ -370,7 +370,7 @@ void RosInterface::brakeActuator () {
 
     brakingMsg.header.stamp = ros::Time::now();
     brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = "mainBraking";
+    brakingMsg.header.frame_id = "0";
     brakingMsg.pwm = 1000;
     brakingMsg.norm = -1.0;
 
