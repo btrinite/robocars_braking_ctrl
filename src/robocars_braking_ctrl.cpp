@@ -48,6 +48,8 @@
 #include <cmath>
 
 #include <std_msgs/Int16MultiArray.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/Float32.h>
 
 #include <robocars_msgs/robocars_actuator_output.h>
 #include <robocars_msgs/robocars_actuator_ctrl_mode.h>
@@ -272,7 +274,8 @@ void RosInterface::updateParam() {
 }
 
 void RosInterface::initPub () {
-    act_braking_pub = nh.advertise<robocars_msgs::robocars_actuator_output>("output", 1);
+    act_braking_output_pub = nh.advertise<std_msgs::Int16>("output", 1);
+    act_braking_norm_pub = nh.advertise<std_msgs::Float32>("norm", 1);
 }
 
 void RosInterface::initSub () {
@@ -322,61 +325,60 @@ void RosInterface::mode_msg_cb(const robocars_msgs::robocars_actuator_ctrl_mode:
 
 void RosInterface::controlActuatorFromRadio (uint32_t braking_value) {
 
-    robocars_msgs::robocars_actuator_output brakingMsg;
+    std_msgs::Int16 brakingOutputMsg;
+    std_msgs::Float32 brakingNormMsg;
+
     float norm=0.0;
-    brakingMsg.header.stamp = ros::Time::now();
-    brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = "0";
     norm = std::fmin((_Float32)0.0,mapRange((_Float32)command_input_min,(_Float32)command_input_max,-1.0,1.0,(_Float32)braking_value));
+
     if (norm<-0.2) {
-        brakingMsg.pwm = std::min((uint32_t)1500,mapRange(command_input_min,command_input_max,command_output_min,command_output_max,braking_value));
-        brakingMsg.norm = norm;
+        brakingOutputMsg.data = std::min((uint32_t)1500,mapRange(command_input_min,command_input_max,command_output_min,command_output_max,braking_value));
+        brakingNormMsg.data = norm;
     } else {
-        brakingMsg.pwm = 1500;
-        brakingMsg.norm = 0;
+        brakingOutputMsg.data = 1500;
+        brakingNormMsg.data = 0;
     }
-    act_braking_pub.publish(brakingMsg);
+    act_braking_output_pub.publish(brakingOutputMsg);
+    act_braking_norm_pub.publish(brakingNormMsg);
 }
 
 void RosInterface::controlActuatorFromAutopilot (_Float32 braking_value, __uint32_t carId) {
 
-    robocars_msgs::robocars_actuator_output brakingMsg;
+    std_msgs::Int16 brakingOutputMsg;
+    std_msgs::Float32 brakingNormMsg;
+
     char frame_id[100];
     snprintf(frame_id, sizeof(frame_id), "%d", carId);
 
-    brakingMsg.header.stamp = ros::Time::now();
-    brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = frame_id;
-    brakingMsg.pwm = std::min((uint32_t)1500,(uint32_t)mapRange(-1.0,1.0,(_Float32)command_output_min,(_Float32)command_output_max,braking_value));
-    brakingMsg.norm = braking_value;
+    brakingOutputMsg.data = std::min((uint32_t)1500,(uint32_t)mapRange(-1.0,1.0,(_Float32)command_output_min,(_Float32)command_output_max,braking_value));
+    brakingNormMsg.data = braking_value;
 
-    act_braking_pub.publish(brakingMsg);
+    act_braking_output_pub.publish(brakingOutputMsg);
+    act_braking_norm_pub.publish(brakingNormMsg);
 }
 
 void RosInterface::maintainIdleActuator () {
 
-    robocars_msgs::robocars_actuator_output brakingMsg;
+    std_msgs::Int16 brakingOutputMsg;
+    std_msgs::Float32 brakingNormMsg;
 
-    brakingMsg.header.stamp = ros::Time::now();
-    brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = "0";
-    brakingMsg.pwm = 1500;
-    brakingMsg.norm = 0.0;
+    brakingOutputMsg.data = 1500;
+    brakingNormMsg.data = 0.0;
 
-    act_braking_pub.publish(brakingMsg);
+    act_braking_output_pub.publish(brakingOutputMsg);
+    act_braking_norm_pub.publish(brakingNormMsg);
 }
 
 void RosInterface::brakeActuator () {
 
-    robocars_msgs::robocars_actuator_output brakingMsg;
+    std_msgs::Int16 brakingOutputMsg;
+    std_msgs::Float32 brakingNormMsg;
 
-    brakingMsg.header.stamp = ros::Time::now();
-    brakingMsg.header.seq=1;
-    brakingMsg.header.frame_id = "0";
-    brakingMsg.pwm = 1000;
-    brakingMsg.norm = -1.0;
+    brakingOutputMsg.data = 1000;
+    brakingNormMsg.data = -1.0;
 
-    act_braking_pub.publish(brakingMsg);
+    act_braking_output_pub.publish(brakingOutputMsg);
+    act_braking_norm_pub.publish(brakingNormMsg);
 }
 
 void RosInterface::initQualibration() {
