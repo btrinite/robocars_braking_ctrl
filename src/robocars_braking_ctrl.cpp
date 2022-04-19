@@ -275,7 +275,7 @@ void RosInterface::updateParam() {
 
 void RosInterface::initPub () {
     act_braking_output_pub = nh.advertise<std_msgs::Int16>("output", 1);
-    act_braking_norm_pub = nh.advertise<std_msgs::Float32>("norm", 1);
+    act_braking_norm_pub = nh.advertise<std_msgs::Float32>("full", 1);
 }
 
 void RosInterface::initSub () {
